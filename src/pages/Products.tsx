@@ -7,10 +7,11 @@ import { FiSliders } from 'react-icons/fi';
 import { productApi } from '../api/product.api';
 
 export const Products: FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [error, setError] = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -38,6 +39,9 @@ export const Products: FC = () => {
         setError(err.message || 'Failed to load products');
       } finally {
         setIsLoading(false);
+        if (!hasLoaded) {
+          setHasLoaded(true);
+        }
       }
     };
 
@@ -48,19 +52,22 @@ export const Products: FC = () => {
     setSearchInput(searchParams.get('q') || '');
   }, [searchParams]);
 
-  const handleSearchSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    const next = new URLSearchParams(searchParams);
-    if (searchInput.trim()) {
-      next.set('q', searchInput.trim());
-    } else {
-      next.delete('q');
-    }
-    setShowFilters(false);
-    window.history.replaceState(null, '', `?${next.toString()}`);
-  };
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const next = new URLSearchParams(searchParams);
+      if (searchInput.trim()) {
+        next.set('q', searchInput.trim());
+      } else {
+        next.delete('q');
+      }
+      setShowFilters(false);
+      setSearchParams(next, { replace: true });
+    }, 300);
 
-  if (isLoading) {
+    return () => window.clearTimeout(timer);
+  }, [searchInput, searchParams, setSearchParams]);
+
+  if (isLoading && !hasLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -75,7 +82,7 @@ export const Products: FC = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
           <div className="flex items-center gap-3">
-            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={searchInput}
@@ -83,13 +90,7 @@ export const Products: FC = () => {
                 placeholder="Search products"
                 className="w-64 px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-              >
-                Search
-              </button>
-            </form>
+            </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -160,6 +161,9 @@ export const Products: FC = () => {
               <p className="text-gray-600">
                 Showing {products.length} products
               </p>
+              {isLoading && (
+                <span className="text-sm text-gray-500">Loading...</span>
+              )}
               <select className="px-4 py-2 border border-gray-300 rounded-lg">
                 <option>Sort by: Featured</option>
                 <option>Price: Low to High</option>

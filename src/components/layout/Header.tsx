@@ -1,6 +1,6 @@
 import { type FC } from 'react';
 import { Link } from 'react-router-dom';
-import { FiShoppingCart, FiUser, FiSearch } from 'react-icons/fi';
+import { FiShoppingCart, FiUser } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -17,18 +17,6 @@ export const Header: FC = () => {
             <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">NAGP</div>
             <span className="text-gray-800 font-semibold group-hover:text-indigo-600 transition">Shopping</span>
           </Link>
-
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-              <FiSearch className="absolute left-3 top-3 text-gray-400" />
-            </div>
-          </div>
 
           {/* Navigation */}
           <nav className="flex items-center space-x-6">

@@ -3,7 +3,7 @@ import type { Product } from '../../../types/product.types';
 import { Button } from '../../common/Button';
 import { formatCurrency } from '../../../utils/formatters';
 import { Link } from 'react-router-dom';
-import { FiStar } from 'react-icons/fi';
+import { FiImage, FiStar } from 'react-icons/fi';
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +11,7 @@ interface ProductCardProps {
 
 export const ProductCard: FC<ProductCardProps> = ({ product }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   const handleAddToCart = async () => {
     try {
@@ -29,11 +30,18 @@ export const ProductCard: FC<ProductCardProps> = ({ product }) => {
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <Link to={`/products/${product.id}`}>
         <div className="relative aspect-square overflow-hidden">
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          />
+          {product.imageUrl && !imageFailed ? (
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              onError={() => setImageFailed(true)}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+              <FiImage className="h-10 w-10" />
+            </div>
+          )}
           {product.stock < 10 && product.stock > 0 && (
             <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
               Only {product.stock} left
